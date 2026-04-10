@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>E-commerce App</title>
+ <style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #2c3e50;
+  }
+
+  h3 {
+    color: #34495e;
+  }
+
+  input {
+    margin: 5px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: #3498db;
+  }
+
+  button {
+    padding: 8px 14px;
+    margin: 5px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+  }
+
+  button:hover {
+    opacity: 0.9;
+  }
+
+  /* Add Button */
+  button:nth-of-type(1) {
+    background-color: #2ecc71;
+  }
+
+  /* Product Card */
+  .product {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 12px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* Delete Button */
+  .product button:first-of-type {
+    background-color: #e74c3c;
+  }
+
+  /* Update Button */
+  .product button:last-of-type {
+    background-color: #3498db;
+  }
+</style>
+</head>
+<body>
+
+<h1>🛒 E-commerce Store</h1>
+
+<h3>Add Product</h3>
+<input id="name" placeholder="Name">
+<input id="price" placeholder="Price">
+<input id="desc" placeholder="Description">
+<button onclick="addProduct()">Add</button>
+
+<h3>Products</h3>
+<div id="products"></div>
+
+<script>
+const API = "http://localhost:5000/products";
+
+// 📌 Fetch products
+function loadProducts() {
+  fetch(API)
+    .then(res => res.json())
+    .then(data => {
+      let output = "";
+      data.forEach(p => {
+        output += `
+          <div class="product">
+            <b>${p.name}</b> - ₹${p.price}<br>
+            ${p.description}<br>
+            <button onclick="deleteProduct('${p._id}')">Delete</button>
+            <button onclick="updateProduct('${p._id}')">Update</button>
+          </div>
+        `;
+      });
+      document.getElementById("products").innerHTML = output;
+    });
+}
+
+// 📌 Add product
+function addProduct() {
+  fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: document.getElementById("name").value,
+      price: document.getElementById("price").value,
+      description: document.getElementById("desc").value
+    })
+  }).then(() => loadProducts());
+}
+
+// 📌 Delete product
+function deleteProduct(id) {
+  fetch(`http://localhost:5000/products/${id}`, {
+    method: "DELETE"
+  })
+  .then(res => res.json())
+  .then(() => loadProducts());
+}
+
+// 📌 Update product
+function updateProduct(id) {
+  const newPrice = prompt("Enter new price:");
+  
+  fetch(`${API}/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ price: newPrice })
+  }).then(() => loadProducts());
+}
+
+// Load on start
+loadProducts();
+</script>
+
+</body>
+</html>
